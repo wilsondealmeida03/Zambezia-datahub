@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zambézia DataHub — Protótipo</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#14213d;--muted:#667085;--accent:#14532d;--line:#e5e7eb;--accent2:#0f766e}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(135deg,#0b3d2e,#176b4d);color:#fff;padding:28px 5%}
+header h1{margin:0 0 8px;font-size:30px} header p{margin:4px 0;opacity:.92}
+.container{width:90%;max-width:1250px;margin:24px auto}
+.controls{display:flex;gap:12px;flex-wrap:wrap;background:var(--card);padding:16px;border-radius:14px;box-shadow:0 4px 18px #0000000d}
+select,button{padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:14px}
+button{cursor:pointer;background:var(--accent);color:#fff;border-color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:18px 0}
+.card{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 4px 18px #0000000d;border:1px solid #eef0f3}
+.card .label{font-size:13px;color:var(--muted)} .card .value{font-size:25px;font-weight:700;margin:7px 0}
+.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px} @media(max-width:850px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 4px 18px #0000000d}
+.panel h2{font-size:18px;margin:0 0 14px} .chart{width:100%;height:310px}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid var(--line);text-align:right} th:first-child,td:first-child{text-align:left}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#e7f5ed;color:#14532d;font-size:12px}
+footer{margin:24px 0 40px;color:var(--muted);font-size:12px;line-height:1.5}
+</style>
+
+<style>
+:root{
+  --z-green:#0b5d4f;
+  --z-green-dark:#073f36;
+  --z-gold:#c89b3c;
+  --z-light:#f3f8f6;
+  --z-border:#dce8e4;
+}
+body{
+  background:linear-gradient(180deg,#f4f9f7 0%,#fff 45%);
+}
+.author-badge{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-top:14px;
+}
+.author-badge span{
+  padding:6px 10px;border-radius:999px;
+  background:rgba(200,155,60,.15);color:#76570e;
+  font-size:.78rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.author-badge strong{
+  color:var(--z-green-dark);font-size:1rem;
+}
+.card,.panel,.box,.metric{
+  border:1px solid var(--z-border);
+  box-shadow:0 8px 26px rgba(7,63,54,.07);
+}
+button,.btn{
+  border-radius:10px;
+  font-weight:700;
+  transition:transform .15s ease,filter .15s ease;
+}
+button:hover,.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+select{
+  border:1px solid var(--z-border);
+  border-radius:10px;
+}
+.section-title{
+  border-left:5px solid var(--z-gold);
+  padding-left:10px;
+}
+.data-source{
+  background:var(--z-light);
+  border-left:4px solid var(--z-green);
+  padding:12px 14px;border-radius:8px;
+}
+.data-source strong{color:var(--z-green-dark)}
+footer{
+  margin-top:40px;padding:22px 10px;
+  border-top:1px solid var(--z-border);
+  text-align:center;color:#64756f;font-size:.9rem;
+}
+footer strong{color:var(--z-green)}
+@media(max-width:700px){
+  .author-badge{gap:7px}
+  .author-badge strong{font-size:.9rem}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Zambézia DataHub</h1>
+<div class="data-source">
+  <strong>Responsável pelo protótipo:</strong> Wilson de Almeida ·
+  Licenciatura em Estatística e Gestão de Informação · Universidade Licungo
+</div>
+
+  <p><strong>Protótipo de Sistema de Informação Estatística para Apoio à Decisão e Monitoria do Desenvolvimento Local</strong></p>
+  <p>Base demonstrativa: Anuário Estatístico, Província da Zambézia, 2024 — INE, publicado em Junho de 2025.</p>
+
+<div class="author-badge">
+  <span>Projeto científico</span>
+  <strong>Wilson de Almeida</strong>
+</div>
+</header>
+<div class="container">
+  <div class="controls">
+    <label>Indicador:
+      <select id="indicator"></select>
+    </label>
+    <label>Ano:
+      <select id="year"></select>
+    </label>
+    <button onclick="resetView()">Visão geral</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2 id="chartTitle">Evolução do indicador</h2>
+      <div id="chart" class="chart"></div>
+    </section>
+    <section class="panel">
+      <h2>Leitura para decisão</h2>
+      <div id="insight"></div>
+      <hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+      <span class="badge">Fonte oficial</span>
+      <p style="font-size:13px;color:#667085">Os valores são apresentados conforme publicados no anuário. O protótipo não preenche anos ausentes nem corrige automaticamente valores da fonte.</p>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>Mini-tabela de dados</h2>
+    <div id="table"></div>
+  </section>
+
+  <footer>
+    <strong>Nota metodológica:</strong> este é um MVP para demonstração nas Jornadas Científicas. 
+    A versão futura poderá integrar bases de dados de diferentes instituições, filtros por distrito, 
+    mapas, metadados, exportação, atualização periódica, controlo de qualidade e perfis de utilizador.
+  </footer>
+</div>
+<script>
+const D = {"População (habitantes)": [5567252, 5709418, 5854843, 6003909, 6156887], "Unidades sanitárias": [271, 273, 280, 284, 292], "Escolas EP": [3530, 3582, 3626, 3400, 3362], "Professores EP": [20921, 21237, 25706, 26794, 24220], "Taxa de aproveitamento EP (%)": [100.0, 91.5, 91.0, 89.9, 89.9], "Produção de milho (t)": [1267571, 1054556, 1132916, 1129350, 1159350], "Produção de mandioca (t)": [3892761, 4226291, 4296912, 4204412, 4575772], "Pesca artesanal (t)": [87456, 79610, 99811, 70956, 104138], "Consumidores de energia elétrica": [200548, 232837, 269174, 295607, 346034], "Energia facturada (MWh)": [168223.9, 151478.0, 193666.0, 200307.8, 202113.5], "Movimento de navios": [72, 87, 94, 173, 266], "Carga manuseada no porto (10³ TP)": [7661, 5674, 11562, 16635, 26933], "PIB - variação em volume (%)": [2.7, -1.7, 2.4, 4.4, 5.4], "PIB per capita a preços correntes (MT)": [16283, 15951.84, 15265, 16784, 18419]};
+const IDH = {"years": [2019, 2020, 2021], "values": [0.512, 0.518, 0.525]};
+const years = [2020, 2021, 2022, 2023, 2024];
+
+const indicators = Object.keys(D);
+const sel = document.getElementById('indicator');
+const ysel = document.getElementById('year');
+indicators.forEach(x=>{let o=document.createElement('option');o.value=x;o.textContent=x;sel.appendChild(o);});
+years.forEach(y=>{let o=document.createElement('option');o.value=y;o.textContent=y;ysel.appendChild(o);});
+sel.value='PIB - variação em volume (%)'; ysel.value=2024;
+
+function svgLine(values, labels) {
+  const W=760,H=290,p=45; const valid=values.filter(v=>v!==null);
+  const min=Math.min(...valid), max=Math.max(...valid), span=(max-min)||1;
+  const pts=values.map((v,i)=> v===null?null:[p+i*(W-2*p)/(values.length-1),H-p-(v-min)/span*(H-2*p)]);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">`;
+  for(let i=0;i<5;i++){let yy=p+i*(H-2*p)/4;s+=`<line x1="${p}" y1="${yy}" x2="${W-p}" y2="${yy}" stroke="#e5e7eb"/>`;}
+  pts.forEach((pt,i)=>{if(pt){s+=`<circle cx="${pt[0]}" cy="${pt[1]}" r="5" fill="#14532d"/>`;s+=`<text x="${pt[0]}" y="${H-18}" text-anchor="middle" font-size="12">${labels[i]}</text>`;}});
+  let path=''; pts.forEach(pt=>{if(pt) path+=(path?' L ':'M ')+pt[0]+' '+pt[1];}); 
+  s+=`<path d="${path}" fill="none" stroke="#14532d" stroke-width="3"/>`;
+  values.forEach((v,i)=>{if(v!==null){let pt=pts[i];let t=(typeof v==='number')?v.toLocaleString('pt-PT',{maximumFractionDigits:2}):v;s+=`<text x="${pt[0]}" y="${pt[1]-10}" text-anchor="middle" font-size="12">${t}</text>`;}});
+  s+='</svg>'; return s;
+}
+function barChart(items) {
+  const W=760,H=290,p=45; const max=Math.max(...items.map(x=>x.v)); const bw=(W-2*p)/items.length*.65;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">`;
+  items.forEach((x,i)=>{let x0=p+i*(W-2*p)/items.length+(W-2*p)/items.length*.175;let h=(x.v/max)*(H-2*p);let y=H-p-h;s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${h}" fill="#14532d" rx="4"/>`;s+=`<text x="${x0+bw/2}" y="${H-18}" text-anchor="middle" font-size="12">${x.label}</text>`;s+=`<text x="${x0+bw/2}" y="${y-7}" text-anchor="middle" font-size="11">${x.v.toLocaleString('pt-PT',{maximumFractionDigits:1})}</text>`;});s+='</svg>';return s;
+}
+function render() {
+  const ind=sel.value, vals=D[ind], year=Number(ysel.value), idx=years.indexOf(year), val=vals[idx];
+  document.getElementById('chartTitle').textContent='Evolução: '+ind;
+  document.getElementById('chart').innerHTML=svgLine(vals,years);
+  document.getElementById('table').innerHTML='<table><tr><th>Ano</th><th>Valor</th></tr>'+years.map((y,i)=>`<tr><td>${y}</td><td>${vals[i]===null?'—':vals[i].toLocaleString('pt-PT',{maximumFractionDigits:2})}</td></tr>`).join('')+'</table>';
+  let change='';
+  if(idx>0 && val!==null && vals[idx-1]!==null) {let c=(val-vals[idx-1])/Math.abs(vals[idx-1])*100; change=`<p><strong>Variação face ao ano anterior:</strong> ${c.toLocaleString('pt-PT',{maximumFractionDigits:1})}%.</p>`;}
+  document.getElementById('insight').innerHTML=`<p><strong>${year}:</strong> ${val===null?'dado não disponível':val.toLocaleString('pt-PT',{maximumFractionDigits:2})}</p>${change}<p>O indicador pode ser cruzado com outros módulos para apoiar diagnóstico territorial, definição de prioridades e monitoria.</p>`;
+  const cardInd=['População (habitantes)','Unidades sanitárias','Escolas EP','Produção de milho (t)','Produção de mandioca (t)','Pesca artesanal (t)','Consumidores de energia elétrica','PIB - variação em volume (%)'];
+  document.getElementById('cards').innerHTML=cardInd.map(k=>{let i=years.indexOf(year),v=D[k][i];return `<div class="card"><div class="label">${k}</div><div class="value">${v===null?'—':v.toLocaleString('pt-PT',{maximumFractionDigits:1})}</div><div class="label">ano ${year}</div></div>`}).join('');
+}
+function resetView(){sel.value='PIB - variação em volume (%)';ysel.value=2024;render();}
+sel.onchange=render; ysel.onchange=render; render();
+</script>
+
+<footer>
+  <strong>Zambézia DataHub</strong><br>
+  Sistema de Informação Estatística para Apoio à Decisão e Monitoria do Desenvolvimento Local<br>
+  Desenvolvido por <strong>Wilson de Almeida</strong> · Universidade Licungo
+</footer>
+</body></html>
